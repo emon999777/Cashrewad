@@ -1,0 +1,2552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CashReward App</title>
+    
+    <!-- Aapka Naya Ad Code -->
+    <script src='//libtl.com/sdk.js' data-zone='9391539' data-sdk='show_9391539'></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #ffffff; }
+        .dark-bg { background-color: #121212; }
+        .card-bg { background-color: #1e1e1e; }
+        .border-accent { border-color: #ff8c00; }
+        .text-accent { color: #ff8c00; }
+        .btn, .btn-accent, .btn-outline-accent { transition: all 0.2s ease-in-out; transform: scale(1); }
+        .btn:active, .btn-accent:active, .btn-outline-accent:active { transform: scale(0.95); }
+        .btn-accent { background-color: #ff8c00; color: #121212; font-weight: bold; }
+        .btn-accent:hover { background-color: #e67e00; }
+        .btn-outline-accent { border: 1px solid #ff8c00; color: #ff8c00; }
+        .btn-outline-accent:hover { background-color: #ff8c00; color: #121212; }
+        .input-field { background-color: #2c2c2c; border: 1px solid #444; }
+        .main-page { display: none; }
+        .main-page.active { display: flex; animation: fadeIn 0.5s ease-in-out; }
+        .sub-page { display: none; }
+        .sub-page.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        .bottom-nav a.active { color: #ff8c00; }
+        .notification-dot {
+            position: absolute; top: -2px; right: -2px; width: 10px; height: 10px;
+            background-color: #ef4444; border-radius: 50%; border: 2px solid #121212; display: none;
+        }
+        .timer { 
+            background-color: #ff8c00; 
+            color: #121212; 
+            padding: 2px 6px; 
+            border-radius: 12px; 
+            font-size: 12px; 
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .pending { 
+            background-color: #f59e0b; 
+            color: white; 
+            padding: 2px 6px; 
+            border-radius: 12px; 
+            font-size: 12px; 
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="max-w-md mx-auto">
+
+    <!-- App Loader -->
+    <div id="loader" class="hidden fixed inset-0 dark-bg bg-opacity-75 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-accent"></div>
+    </div>
+
+    <!-- Authentication Section -->
+    <div id="auth-section" class="min-h-screen p-6 flex-col justify-center main-page">
+        <h1 class="text-4xl font-bold text-center mb-2 text-accent">CashReward</h1>
+        <p class="text-center text-gray-400 mb-8">Login or Sign Up to continue</p>
+        <div id="auth-container">
+            <div id="login-view">
+                <input id="login-email" type="email" placeholder="Email" class="w-full p-3 rounded-lg input-field mb-4">
+                <input id="login-password" type="password" placeholder="Password" class="w-full p-3 rounded-lg input-field mb-4">
+                <button id="login-btn" class="w-full p-3 rounded-lg btn-accent mb-4">Login</button>
+                <p class="text-center text-gray-400">নতুন অ্যাকাউন্ট? <a href="#" id="show-signup" class="font-semibold text-accent">Sign Up</a></p>
+            </div>
+            <div id="signup-view" class="hidden">
+                 <input id="signup-name" type="text" placeholder="Full Name" class="w-full p-3 rounded-lg input-field mb-4">
+                <input id="signup-email" type="email" placeholder="Email" class="w-full p-3 rounded-lg input-field mb-4">
+                <input id="signup-password" type="password" placeholder="Password" class="w-full p-3 rounded-lg input-field mb-4">
+                <button id="signup-btn" class="w-full p-3 rounded-lg btn-accent mb-4">Sign Up</button>
+                <p class="text-center text-gray-400">আগে থেকে অ্যাকাউন্ট আছে? <a href="#" id="show-login" class="font-semibold text-accent">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="min-h-screen flex-col main-page">
+        <header class="flex items-center justify-between p-4 sticky top-0 bg-opacity-80 backdrop-blur-md z-10 dark-bg">
+            <h1 class="text-xl font-bold">CashReward</h1>
+            <div class="flex items-center space-x-4">
+                <div id="notification-bell" class="relative cursor-pointer">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                    <div id="notification-dot" class="notification-dot"></div>
+                </div>
+                <i data-lucide="user" class="w-6 h-6 cursor-pointer" onclick="navigateTo('profile-page')"></i>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            <!-- Home Page -->
+            <div id="home-page" class="p-4 space-y-6 sub-page">
+                <div class="card-bg p-4 rounded-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Your Balance</p>
+                        <p class="text-3xl font-bold"><span id="coin-balance">0</span> Coins</p>
+                    </div>
+                    <button id="home-withdraw-btn" class="bg-white text-black font-semibold px-6 py-2 rounded-lg">Withdraw</button>
+                </div>
+                <section>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-semibold">Daily Tasks</h2>
+                            <p class="text-sm text-gray-400 mb-4">Complete tasks to get rewards.</p>
+                        </div>
+                        <p class="text-sm text-gray-400">Ads Left: <span id="ads-left-count">...</span></p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-orange-500 p-3 rounded-lg flex items-center justify-between text-black">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">🤩</span><div><h3 class="font-bold">Watch Short Ad</h3><p class="text-xs font-medium">Rewarded Interstitial</p></div></div>
+                            <button class="bg-white text-orange-500 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('interstitial')">Claim</button>
+                        </div>
+                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">😎</span><div><h3 class="font-semibold">Click for Reward</h3><p class="text-xs text-gray-400">Rewarded Popup</p></div></div>
+                            <button class="bg-white text-black font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('popup')">Claim</button>
+                        </div>
+                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">👀</span><div><h3 class="font-semibold">Watch a Video</h3><p class="text-xs text-gray-400">In-App Interstitial</p></div></div>
+                            <button class="bg-gray-700 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('inApp')">Start</button>
+                        </div>
+                        <div class="card-bg p-3 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">🎮</span><div><h3 class="font-semibold">Play Mini App</h3><p class="text-xs text-gray-400">Get a big reward!</p></div></div>
+                            <button class="bg-blue-500 text-white font-bold px-6 py-2 rounded-lg text-sm btn" onclick="claimReward('miniApp')">Play</button>
+                        </div>
+                        <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-lg flex items-center justify-between text-white">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">💼</span><div><h3 class="font-bold">Daily Jobs</h3><p class="text-xs font-medium">Watch & Earn 10 Coins</p></div></div>
+                            <button class="bg-white text-purple-600 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="navigateTo('daily-jobs-page')">Start</button>
+                        </div>
+                        <!-- Pro Jobs Button -->
+                        <div class="bg-gradient-to-r from-red-600 to-pink-600 p-3 rounded-lg flex items-center justify-between text-white">
+                            <div class="flex items-center space-x-3"><span class="text-3xl">🔥</span><div><h3 class="font-bold">Pro Jobs</h3><p class="text-xs font-medium">Sign Up & Earn Big Rewards</p></div></div>
+                            <button class="bg-white text-red-600 font-bold px-6 py-2 rounded-lg text-sm btn" onclick="navigateTo('pro-jobs-page')">Start</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Wallet Page -->
+            <div id="wallet-page" class="p-4 space-y-6 sub-page">
+                <h2 class="text-xl font-bold text-center">My Wallet</h2>
+                <div class="card-bg p-4 rounded-lg">
+                    <h3 class="font-semibold mb-3">Withdraw Earnings</h3>
+                    <p class="text-sm text-gray-400 mb-1">Current Balance: <span class="font-bold text-accent"><span id="wallet-coin-balance">0</span> Coins</span></p>
+                    <p class="text-sm text-gray-400 mb-2">Minimum Withdrawal: <span id="min-withdrawal-info">...</span> Coins</p>
+                    <p class="text-sm text-gray-400 mb-4 font-semibold" id="coin-value-info">...</p>
+                    <input id="withdraw-amount" type="number" placeholder="কয়েন পরিমাণ লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
+                    <select id="withdraw-method" class="w-full p-3 rounded-lg input-field mb-3">
+                        <option value="">Select Method</option>
+                        <option value="Bkash">Bkash</option>
+                        <option value="Nagad">Nagad</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Paytm">Paytm</option>
+                    </select>
+                    <div id="payment-details-container"></div>
+                    <button id="withdraw-btn" class="w-full p-3 rounded-lg btn-accent mt-3">Request Withdrawal</button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Withdrawal History</h3>
+                    <div id="withdrawal-history-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- Refer Page -->
+            <div id="refer-page" class="p-4 space-y-6 sub-page">
+                 <h2 class="text-xl font-bold text-center">Refer & Earn</h2>
+                 
+                 <!-- Added verification requirement notice for unverified users -->
+                 <div id="referral-blocked-notice" class="card-bg p-4 rounded-lg border-2 border-red-500 text-center hidden">
+                     <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                         <i data-lucide="lock" class="w-8 h-8 text-white"></i>
+                     </div>
+                     <h3 class="text-lg font-bold text-red-500 mb-2">রেফারেল ফিচার লক</h3>
+                     <p class="text-gray-300 text-sm mb-4">রেফারেল ফিচার ব্যবহার করতে প্রথমে আপনার একাউন্ট ভেরিফাই করুন।</p>
+                     <button onclick="navigateTo('profile-page')" class="btn-accent px-6 py-2 rounded-lg">ভেরিফাই করুন</button>
+                 </div>
+
+                 <!-- Added referral stats and earnings display -->
+                 <div id="referral-stats" class="grid grid-cols-2 gap-4 hidden">
+                     <div class="card-bg p-4 rounded-lg text-center">
+                         <p class="text-gray-400 text-sm">পেইড রেফার</p>
+                         <p class="text-2xl font-bold text-green-500" id="paid-referrals-count">0</p>
+                     </div>
+                     <div class="card-bg p-4 rounded-lg text-center">
+                         <p class="text-gray-400 text-sm">ফ্রি রেফার</p>
+                         <p class="text-2xl font-bold text-blue-500" id="free-referrals-count">0</p>
+                     </div>
+                     <div class="card-bg p-4 rounded-lg text-center">
+                         <p class="text-gray-400 text-sm">রেফার আয়</p>
+                         <p class="text-2xl font-bold text-accent" id="referral-earnings">0</p>
+                     </div>
+                     <div class="card-bg p-4 rounded-lg text-center">
+                         <p class="text-gray-400 text-sm">উইথড্র যোগ্য</p>
+                         <p class="text-lg font-bold" id="withdrawal-eligible">
+                             <span class="text-red-500">না</span>
+                         </p>
+                     </div>
+                 </div>
+
+                 <!-- Enhanced referral code section with verification status -->
+                 <div id="referral-code-section" class="card-bg p-6 rounded-lg text-center hidden">
+                     <p class="text-gray-400 mb-2">আপনার রেফারেল কোড</p>
+                     <div class="bg-gray-800 p-3 rounded-lg flex items-center justify-center mb-4">
+                         <span id="referral-code" class="text-2xl font-bold tracking-widest">LOADING...</span>
+                         <button id="copy-code-btn" class="ml-4"><i data-lucide="copy" class="w-6 h-6 text-gray-400"></i></button>
+                     </div>
+                     <p class="text-sm text-gray-300">বন্ধুদের সাথে কোড শেয়ার করুন।</p>
+                 </div>
+
+                 <!-- Added dual referral link system -->
+                 <div id="referral-links-section" class="space-y-4 hidden">
+                     <div class="card-bg p-4 rounded-lg">
+                         <h3 class="font-bold mb-3 text-center">রেফারেল লিংক</h3>
+                         
+                         <div class="space-y-3">
+                             <div class="bg-gradient-to-r from-green-600 to-green-700 p-4 rounded-lg">
+                                 <div class="flex items-center justify-between mb-2">
+                                     <h4 class="font-bold text-white">পেইড ভেরিফিকেশন লিংক</h4>
+                                     <span class="bg-white text-green-600 px-2 py-1 rounded text-xs font-bold" id="referral-bonus-amount">৩০ টাকা</span>
+                                 </div>
+                                 <p class="text-green-100 text-sm mb-3">এই লিংক দিয়ে সাইনআপ করে ভেরিফাই হলে আপনি বোনাস পাবেন</p>
+                                 <div class="flex space-x-2">
+                                     <input type="text" id="paid-referral-link" class="flex-1 p-2 rounded bg-white text-black text-sm" readonly>
+                                     <button onclick="copyReferralLink('paid')" class="bg-white text-green-600 px-4 py-2 rounded font-bold text-sm">কপি</button>
+                                 </div>
+                             </div>
+                             
+                             <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4 rounded-lg">
+                                 <div class="flex items-center justify-between mb-2">
+                                     <h4 class="font-bold text-white">ফ্রি একাউন্ট লিংক</h4>
+                                     <span class="bg-white text-blue-600 px-2 py-1 rounded text-xs font-bold">১০টি = উইথড্র</span>
+                                 </div>
+                                 <p class="text-blue-100 text-sm mb-3">১০টি ফ্রি রেফার কমপ্লিট করলে উইথড্র করতে পারবেন</p>
+                                 <div class="flex space-x-2">
+                                     <input type="text" id="free-referral-link" class="flex-1 p-2 rounded bg-white text-black text-sm" readonly>
+                                     <button onclick="copyReferralLink('free')" class="bg-white text-blue-600 px-4 py-2 rounded font-bold text-sm">কপি</button>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+
+                 <!-- Updated share button to work with verification -->
+                 <button id="share-btn" class="w-full p-3 rounded-lg btn-accent hidden">রেফারেল লিংক শেয়ার করুন</button>
+                 
+                 <!-- Enhanced referral code input section -->
+                 <div class="card-bg p-4 rounded-lg mt-6">
+                    <h3 class="font-semibold mb-3 text-center">রেফারেল কোড আছে?</h3>
+                    <input id="enter-referral-code" type="text" placeholder="এখানে কোড লিখুন" class="w-full p-3 rounded-lg input-field mb-3">
+                    <button id="apply-referral-btn" class="w-full p-3 rounded-lg btn-outline-accent">কোড ব্যবহার করুন</button>
+                 </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="p-4 space-y-6 sub-page">
+                <h2 class="text-xl font-bold text-center mb-4">Profile</h2>
+                <div class="flex flex-col items-center">
+                    <img src="https://placehold.co/100x100/1e1e1e/ff8c00?text=U" class="rounded-full mb-2">
+                    <h2 id="profile-name" class="text-xl font-bold">User Name</h2>
+                    <p id="profile-email" class="text-gray-400">user@email.com</p>
+                </div>
+                
+                <!-- Added verification notice for unverified users -->
+                <div id="verification-notice" class="card-bg p-4 rounded-lg border-2 border-orange-500 hidden">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="alert-triangle" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-orange-500 mb-2">আপনার একাউন্ট ভেরিফাইড নয়</h3>
+                        <p class="text-gray-300 text-sm mb-4">প্রো ফিচার এবং রেফারেল ফিচার উপভোগ করার জন্য আপনার একাউন্ট ভেরিফাই করুন।</p>
+                        <button id="verify-account-btn" class="w-full p-3 rounded-lg btn-accent font-bold">ভেরিফাই করুন</button>
+                    </div>
+                </div>
+
+                <!-- Added verification status display for verified users -->
+                <div id="verification-status" class="card-bg p-4 rounded-lg border-2 border-green-500 hidden">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="check-circle" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-green-500 mb-2">আপনার একাউন্ট ভেরিফাইড</h3>
+                        <p class="text-gray-300 text-sm">আপনি এখন সব ফিচার ব্যবহার করতে পারবেন।</p>
+                    </div>
+                </div>
+
+                <!-- Added verification pending status -->
+                <div id="verification-pending" class="card-bg p-4 rounded-lg border-2 border-yellow-500 hidden">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="clock" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-yellow-500 mb-2">আপনার একাউন্ট ভেরিফিকেশন রিভিউতে আছে</h3>
+                        <p class="text-gray-300 text-sm">এডমিন প্যানেল থেকে খুব শীঘ্রই আপনার একাউন্ট ভেরিফাই করে দেওয়া হবে।</p>
+                    </div>
+                </div>
+
+                <!-- Added admin panel access button for admin users -->
+                <div id="admin-access" class="hidden">
+                    <button onclick="navigateTo('admin-panel')" class="w-full p-3 rounded-lg bg-purple-600 text-white font-bold mb-3">Admin Panel</button>
+                </div>
+                <button id="logout-btn" class="w-full mt-6 p-3 rounded-lg bg-red-600 text-white font-bold">Logout</button>
+            </div>
+            
+            <!-- Notifications Page -->
+            <div id="notifications-page" class="p-4 space-y-4 sub-page">
+                <h2 class="text-xl font-bold text-center">Notifications</h2>
+                <div id="notifications-list" class="space-y-3"></div>
+            </div>
+
+            <!-- Daily Jobs Page -->
+            <div id="daily-jobs-page" class="p-4 space-y-6 sub-page">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="navigateTo('home-page')" class="flex items-center text-gray-400 hover:text-white">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        Back
+                    </button>
+                    <h2 class="text-xl font-bold">Daily Jobs</h2>
+                    <div></div>
+                </div>
+                
+                <div class="card-bg p-4 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold mb-2">Watch & Earn</h3>
+                    <p class="text-gray-400 text-sm mb-4">Click on any job below, watch the ad for 15 seconds, and earn 10 coins!</p>
+                    <div class="flex items-center justify-center space-x-4 text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                            <span>Available</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                            <span>Cooldown</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="daily-jobs-container" class="space-y-3">
+                    <!-- Job buttons will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Pro Jobs Page -->
+            <div id="pro-jobs-page" class="p-4 space-y-6 sub-page">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="navigateTo('home-page')" class="flex items-center text-gray-400 hover:text-white">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        Back
+                    </button>
+                    <h2 class="text-xl font-bold">Pro Jobs</h2>
+                    <div></div>
+                </div>
+                
+                <div class="card-bg p-4 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold mb-2">Sign Up & Earn</h3>
+                    <p class="text-gray-400 text-sm mb-4">Click on any job below, sign up for the service, submit screenshots, and earn rewards!</p>
+                    <div class="flex items-center justify-center space-x-4 text-sm">
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                            <span>Available</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                            <span>Pending</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                            <span>Cooldown</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pro-jobs-container" class="space-y-3">
+                    <!-- Pro job buttons will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Pro Job Submission Modal -->
+            <div id="pro-job-submission-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold" id="pro-job-modal-title">Submit Screenshots</h3>
+                        <button onclick="closeProJobModal()" class="text-gray-400 hover:text-white">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm text-gray-400 mb-2">Please sign up using the link below:</p>
+                            <a id="pro-job-link" href="#" target="_blank" class="block text-blue-400 underline mb-4">Click here to sign up</a>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Before Sign Up Screenshot URL</label>
+                            <input type="url" id="before-screenshot-url" class="w-full p-3 rounded-lg input-field" placeholder="Paste screenshot URL">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">After Sign Up Screenshot URL</label>
+                            <input type="url" id="after-screenshot-url" class="w-full p-3 rounded-lg input-field" placeholder="Paste screenshot URL">
+                        </div>
+                        
+                        <button onclick="submitProJobScreenshots()" class="w-full p-3 rounded-lg btn-accent">Submit Screenshots</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Panel -->
+            <div id="admin-panel" class="p-4 space-y-6 sub-page">
+                <div class="flex items-center justify-between mb-4">
+                    <button onclick="navigateTo('profile-page')" class="flex items-center text-gray-400 hover:text-white">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                        Back
+                    </button>
+                    <h2 class="text-xl font-bold">Admin Panel</h2>
+                    <div></div>
+                </div>
+
+                <!-- Admin Stats Dashboard -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="card-bg p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm">Total Users</p>
+                        <p class="text-2xl font-bold" id="admin-total-users">0</p>
+                    </div>
+                    <div class="card-bg p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm">Jobs Completed Today</p>
+                        <p class="text-2xl font-bold" id="admin-jobs-today">0</p>
+                    </div>
+                    <div class="card-bg p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm">Total Coins Earned</p>
+                        <p class="text-2xl font-bold" id="admin-total-coins">0</p>
+                    </div>
+                    <div class="card-bg p-4 rounded-lg text-center">
+                        <p class="text-gray-400 text-sm">Pending Withdrawals</p>
+                        <p class="text-2xl font-bold" id="admin-pending-withdrawals">0</p>
+                    </div>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="flex space-x-2 mb-4">
+                    <button onclick="showAdminTab('jobs')" class="admin-tab-btn flex-1 p-2 rounded-lg bg-purple-600 text-white font-semibold" id="jobs-tab">Job Management</button>
+                    <button onclick="showAdminTab('users')" class="admin-tab-btn flex-1 p-2 rounded-lg card-bg text-gray-400 font-semibold" id="users-tab">User Management</button>
+                    <!-- Added verification management tab -->
+                    <button onclick="showAdminTab('verification')" class="admin-tab-btn flex-1 p-2 rounded-lg card-bg text-gray-400 font-semibold" id="verification-tab">Verification</button>
+                    <!-- Added notifications management tab -->
+                    <button onclick="showAdminTab('notifications')" class="admin-tab-btn flex-1 p-2 rounded-lg card-bg text-gray-400 font-semibold" id="notifications-tab">Notifications</button>
+                    <!-- Added configuration management tab -->
+                    <button onclick="showAdminTab('config')" class="admin-tab-btn flex-1 p-2 rounded-lg card-bg text-gray-400 font-semibold" id="config-tab">Config</button>
+                    <button onclick="showAdminTab('withdrawals')" class="admin-tab-btn flex-1 p-2 rounded-lg card-bg text-gray-400 font-semibold" id="withdrawals-tab">Withdrawals</button>
+                    <button onclick="showAdminTab('pro-jobs')" class="admin-tab-btn flex-1 p-2 rounded-lg card-bg text-gray-400 font-semibold" id="pro-jobs-tab">Pro Jobs</button>
+                </div>
+
+                <!-- Job Management Tab -->
+                <div id="admin-jobs-tab" class="admin-tab-content">
+                    <div class="card-bg p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-3">Add/Edit Job</h3>
+                        <div class="space-y-3">
+                            <select id="admin-job-select" class="w-full p-3 rounded-lg input-field">
+                                <option value="">Select Job to Edit</option>
+                            </select>
+                            <input id="admin-job-name" type="text" placeholder="Job Name" class="w-full p-3 rounded-lg input-field">
+                            <input id="admin-job-link" type="url" placeholder="Job Link" class="w-full p-3 rounded-lg input-field">
+                            <div class="flex space-x-2">
+                                <button onclick="saveJobSettings()" class="flex-1 p-3 rounded-lg btn-accent">Save Job</button>
+                                <button onclick="resetJobForm()" class="flex-1 p-3 rounded-lg btn-outline-accent">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-bg p-4 rounded-lg">
+                        <h3 class="font-semibold mb-3">Recent Job Completions</h3>
+                        <div id="admin-recent-jobs" class="space-y-2 max-h-64 overflow-y-auto">
+                            <!-- Recent job completions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Management Tab -->
+                <div id="admin-users-tab" class="admin-tab-content hidden">
+                    <div class="card-bg p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-3">User Search</h3>
+                        <div class="flex space-x-2">
+                            <input id="admin-user-search" type="text" placeholder="Search by email or name" class="flex-1 p-3 rounded-lg input-field">
+                            <button onclick="searchUsers()" class="p-3 rounded-lg btn-accent">Search</button>
+                        </div>
+                    </div>
+
+                    <div class="card-bg p-4 rounded-lg">
+                        <h3 class="font-semibold mb-3">User List</h3>
+                        <div id="admin-users-list" class="space-y-2 max-h-64 overflow-y-auto">
+                            <!-- Users will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Added verification management tab -->
+                <div id="admin-verification-tab" class="admin-tab-content hidden">
+                    <div class="card-bg p-4 rounded-lg mb-4">
+                        <h3 class="font-semibold mb-3">Verification Statistics</h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center">
+                                <p class="text-gray-400 text-sm">Pending</p>
+                                <p class="text-xl font-bold text-yellow-500" id="pending-verifications-count">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-gray-400 text-sm">Approved</p>
+                                <p class="text-xl font-bold text-green-500" id="approved-verifications-count">0</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-gray-400 text-sm">Rejected</p>
+                                <p class="text-xl font-bold text-red-500" id="rejected-verifications-count">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-bg p-4 rounded-lg">
+                        <h3 class="font-semibold mb-3">Pending Verification Requests</h3>
+                        <div id="admin-verification-list" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Pending verification requests will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawals Management Tab -->
+                <div id="admin-withdrawals-tab" class="admin-tab-content hidden">
+                    <div class="card-bg p-4 rounded-lg">
+                        <h3 class="font-semibold mb-3">Pending Withdrawals</h3>
+                        <div id="admin-withdrawals-list" class="space-y-3 max-h-64 overflow-y-auto">
+                            <!-- Pending withdrawals will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pro Jobs Management Tab -->
+                <div id="admin-pro-jobs-tab" class="admin-tab-content hidden">
+                    <div class="card-bg p-4 rounded-lg">
+                        <h3 class="font-semibold mb-3">Pending Pro Job Submissions</h3>
+                        <div id="admin-pro-jobs-list" class="space-y-3 max-h-64 overflow-y-auto">
+                            <!-- Pending pro job submissions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Added configuration management tab -->
+                <div id="admin-config-tab" class="admin-tab-content hidden">
+                    <div class="space-y-6">
+                        <!-- Referral & Verification Settings -->
+                        <div class="card-bg p-4 rounded-lg">
+                            <h3 class="font-semibold mb-4">Referral & Verification Settings</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Referral Bonus Amount (Taka)</label>
+                                    <input id="config-referral-bonus" type="number" placeholder="30" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Amount paid when referred user gets verified</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Verification Fee (Taka)</label>
+                                    <input id="config-verification-fee" type="number" placeholder="50" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Fee required for account verification</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Min Free Referrals for Withdrawal</label>
+                                    <input id="config-min-free-referrals" type="number" placeholder="10" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Minimum free referrals needed to withdraw</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Free Referral Bonus (Coins)</label>
+                                    <input id="config-free-referral-bonus" type="number" placeholder="100" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Coins given for each free referral</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Settings -->
+                        <div class="card-bg p-4 rounded-lg">
+                            <h3 class="font-semibold mb-4">Payment Settings</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Bkash Number</label>
+                                    <input id="config-bkash-number" type="tel" placeholder="01XXXXXXXXX" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Bkash number for verification payments</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Nagad Number</label>
+                                    <input id="config-nagad-number" type="tel" placeholder="01XXXXXXXXX" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Nagad number for verification payments</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- App Settings -->
+                        <div class="card-bg p-4 rounded-lg">
+                            <h3 class="font-semibold mb-4">App Settings</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Minimum Withdrawal (Coins)</label>
+                                    <input id="config-min-withdrawal" type="number" placeholder="5000" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Minimum coins required for withdrawal</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Daily Ad Limit</label>
+                                    <input id="config-daily-ad-limit" type="number" placeholder="10" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Maximum ads a user can watch per day</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Coin Value (Coins)</label>
+                                    <input id="config-coin-value-coins" type="number" placeholder="1000" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">Number of coins in conversion rate</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Coin Value (INR)</label>
+                                    <input id="config-coin-value-inr" type="number" placeholder="10" class="w-full p-3 rounded-lg input-field">
+                                    <p class="text-xs text-gray-400 mt-1">INR value for coin conversion rate</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Save Configuration -->
+                        <div class="flex space-x-4">
+                            <button onclick="saveConfiguration()" class="flex-1 p-3 rounded-lg btn-accent font-bold">Save Configuration</button>
+                            <button onclick="loadConfiguration()" class="flex-1 p-3 rounded-lg btn-outline-accent font-bold">Reset to Current</button>
+                        </div>
+
+                        <!-- Configuration Status -->
+                        <div class="card-bg p-4 rounded-lg">
+                            <h3 class="font-semibold mb-3">Configuration Status</h3>
+                            <div id="config-status" class="text-sm text-gray-400">
+                                Configuration loaded successfully.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <nav class="bottom-nav sticky bottom-0 grid grid-cols-5 items-center text-center py-2 card-bg">
+            <a href="#" class="nav-link" data-page="home-page"><i data-lucide="home" class="mx-auto w-6 h-6"></i><span class="text-xs">Home</span></a>
+            <a href="#" class="nav-link" data-page="wallet-page"><i data-lucide="wallet" class="mx-auto w-6 h-6"></i><span class="text-xs">Wallet</span></a>
+            <a href="#" class="nav-link" data-page="refer-page"><i data-lucide="users" class="mx-auto w-6 h-6"></i><span class="text-xs">Refer</span></a>
+            <a href="#" class="nav-link" data-page="daily-jobs-page"><i data-lucide="briefcase" class="mx-auto w-6 h-6"></i><span class="text-xs">Daily Jobs</span></a>
+            <a href="#" class="nav-link" data-page="pro-jobs-page"><i data-lucide="award" class="mx-auto w-6 h-6"></i><span class="text-xs">Pro Jobs</span></a>
+        </nav>
+    </div>
+    
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-sm text-center">
+            <p id="alert-message" class="mb-4"></p>
+            <button id="alert-ok-btn" class="btn-accent px-6 py-2 rounded-lg">OK</button>
+        </div>
+    </div>
+
+    <!-- Added verification modal -->
+    <div id="verification-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">একাউন্ট ভেরিফিকেশন</h3>
+                <button onclick="closeVerificationModal()" class="text-gray-400 hover:text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-blue-600 p-4 rounded-lg">
+                    <h4 class="font-bold mb-2">ভেরিফিকেশন ফি</h4>
+                    <p class="text-sm">একাউন্ট ভেরিফাই করতে <span id="verification-fee">৫০</span> টাকা পেমেন্ট করুন।</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">পেমেন্ট মেথড সিলেক্ট করুন</label>
+                    <select id="verification-payment-method" class="w-full p-3 rounded-lg input-field">
+                        <option value="">পেমেন্ট মেথড সিলেক্ট করুন</option>
+                        <option value="bkash">বিকাশ</option>
+                        <option value="nagad">নগদ</option>
+                    </select>
+                </div>
+
+                <div id="payment-number-container" class="hidden">
+                    <label class="block text-sm font-medium mb-2">পেমেন্ট নাম্বার</label>
+                    <div class="bg-gray-700 p-3 rounded-lg">
+                        <p class="text-sm text-gray-300 mb-1">এই নাম্বারে টাকা পাঠান:</p>
+                        <p id="payment-number" class="text-lg font-bold text-accent">01XXXXXXXXX</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">আপনার নাম্বার (যে নাম্বার থেকে টাকা পাঠিয়েছেন)</label>
+                    <input type="tel" id="sender-number" class="w-full p-3 rounded-lg input-field" placeholder="01XXXXXXXXX">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">ট্রানজেকশন আইডি</label>
+                    <input type="text" id="transaction-id" class="w-full p-3 rounded-lg input-field" placeholder="TXN123456789">
+                </div>
+                
+                <button onclick="submitVerificationRequest()" class="w-full p-3 rounded-lg btn-accent">ভেরিফিকেশন রিকুয়েস্ট সাবমিট করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const firebaseConfig = {
+            apiKey: "AIzaSyDBnaXav_M1C45PHs78D7n1QlnR1G9e6SY",
+            authDomain: "arningappbot-a7aca.firebaseapp.com",
+            projectId: "arningappbot-a7aca",
+            storageBucket: "arningappbot-a7aca.firebasestorage.app",
+            messagingSenderId: "357948746475",
+            appId: "1:357948746475:web:e58919995bb8a066d9ecae"
+        };
+        
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, limit, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userData = null;
+        let appConfig = {};
+
+        const loader = document.getElementById('loader');
+        const coinBalanceEl = document.getElementById('coin-balance');
+        const walletCoinBalanceEl = document.getElementById('wallet-coin-balance');
+        const profileNameEl = document.getElementById('profile-name');
+        const profileEmailEl = document.getElementById('profile-email');
+        const referralCodeEl = document.getElementById('referral-code');
+        const minWithdrawalInfoEl = document.getElementById('min-withdrawal-info');
+        const coinValueInfoEl = document.getElementById('coin-value-info');
+        const withdrawMethodSelect = document.getElementById('withdraw-method');
+        const notificationDot = document.getElementById('notification-dot');
+        const adsLeftCountEl = document.getElementById('ads-left-count');
+        const paymentDetailsContainer = document.getElementById('payment-details-container');
+
+        let currentJobTracking = null; // {jobId, startTime, jobLink}
+        let currentProJobId = null; // Track which pro job is being submitted
+
+        window.onload = () => {
+            lucide.createIcons();
+            setupEventListeners();
+            showMainPage('auth-section');
+            loader.style.display = 'none';
+            onAuthStateChanged(auth, handleAuthStateChange);
+        };
+
+        async function handleAuthStateChange(user) {
+            if (user) {
+                loader.style.display = 'flex';
+                currentUser = user;
+                await fetchUserData();
+                if (userData.isBlocked) {
+                    showAlert("Aapka account block kar diya gaya hai.");
+                    await signOut(auth);
+                    loader.style.display = 'none';
+                    return;
+                }
+                await fetchAppConfig();
+                await checkNewNotifications();
+                checkAdminAccess();
+                updateUI();
+                showMainPage('app-container');
+                navigateTo('home-page');
+                loader.style.display = 'none';
+            } else {
+                currentUser = null;
+                userData = null;
+                showMainPage('auth-section');
+            }
+        }
+
+        async function fetchUserData() {
+            if (!currentUser) return;
+            const userRef = doc(db, "users", currentUser.uid);
+            try {
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    userData = userSnap.data();
+                } else {
+                    const ownReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const defaultUserData = {
+                        uid: currentUser.uid, name: currentUser.email.split('@')[0], email: currentUser.email,
+                        balance: 50, referralCode: ownReferralCode, referredBy: null,
+                        lastNotificationCheck: new Date(),
+                        createdAt: serverTimestamp(),
+                        dailyAdCount: 0, lastAdWatchDate: new Date().toISOString().split('T')[0], isBlocked: false,
+                        isVerified: false,
+                        verificationStatus: 'unverified', // unverified, pending, verified, rejected
+                        verificationRequestedAt: null,
+                        verificationData: null,
+                        paidReferrals: 0,
+                        freeReferrals: 0,
+                        referralEarnings: 0,
+                        referralHistory: []
+                    };
+                    await setDoc(userRef, defaultUserData);
+                    userData = defaultUserData;
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                showAlert("User data load karne mein error aayi.");
+            }
+        }
+
+        async function fetchAppConfig() {
+            const configRef = doc(db, "config", "main");
+            try {
+                const configSnap = await getDoc(configRef);
+                appConfig = configSnap.exists() ? configSnap.data() : { 
+                    minWithdrawal: 5000, 
+                    paymentMethods: ["UPI", "Paytm", "Bkash", "Nagad"], 
+                    dailyAdLimit: 10, 
+                    coinValueCoins: 1000, 
+                    coinValueInr: 10,
+                    referralBonus: 30,
+                    verificationFee: 50,
+                    minFreeReferrals: 10,
+                    freeReferralBonus: 100,
+                    bkashNumber: "01XXXXXXXXX",
+                    nagadNumber: "01XXXXXXXXX"
+                };
+            } catch (error) {
+                console.error("Error fetching app config:", error);
+            }
+        }
+        
+        function updateUI() {
+            if (!userData) return;
+            const balance = userData.balance || 0;
+            coinBalanceEl.textContent = balance;
+            walletCoinBalanceEl.textContent = balance;
+            profileNameEl.textContent = userData.name || 'No Name';
+            profileEmailEl.textContent = userData.email || 'No Email';
+            referralCodeEl.textContent = userData.referralCode || '...';
+            minWithdrawalInfoEl.textContent = `${appConfig.minWithdrawal || 5000} Coins`;
+            coinValueInfoEl.textContent = `${appConfig.coinValueCoins || 1000} Coins = ₹${appConfig.coinValueInr || 10}`;
+            
+            updateVerificationStatus();
+            updateReferralUI();
+            
+            // Update payment methods dropdown
+            withdrawMethodSelect.innerHTML = '';
+            (appConfig.paymentMethods || []).forEach(method => {
+                const option = document.createElement('option');
+                option.value = method;
+                option.textContent = method;
+                withdrawMethodSelect.appendChild(option);
+            });
+            
+            updateDynamicPaymentFields();
+            updateAdsLeftCount();
+            
+            // Setup Pro Jobs
+            setupProJobs();
+        }
+
+        function updateReferralUI() {
+            const isVerified = userData.verificationStatus === 'verified';
+            const referralBlockedNotice = document.getElementById('referral-blocked-notice');
+            const referralStats = document.getElementById('referral-stats');
+            const referralCodeSection = document.getElementById('referral-code-section');
+            const referralLinksSection = document.getElementById('referral-links-section');
+            const shareBtn = document.getElementById('share-btn');
+            
+            if (isVerified) {
+                // Show referral features for verified users
+                referralBlockedNotice.classList.add('hidden');
+                referralStats.classList.remove('hidden');
+                referralCodeSection.classList.remove('hidden');
+                referralLinksSection.classList.remove('hidden');
+                shareBtn.classList.remove('hidden');
+                
+                // Update referral stats
+                document.getElementById('paid-referrals-count').textContent = userData.paidReferrals || 0;
+                document.getElementById('free-referrals-count').textContent = userData.freeReferrals || 0;
+                document.getElementById('referral-earnings').textContent = userData.referralEarnings || 0;
+                
+                // Update withdrawal eligibility
+                const freeReferrals = userData.freeReferrals || 0;
+                const withdrawalEligible = document.getElementById('withdrawal-eligible');
+                if (freeReferrals >= 10) {
+                    withdrawalEligible.innerHTML = '<span class="text-green-500">হ্যাঁ</span>';
+                } else {
+                    withdrawalEligible.innerHTML = `<span class="text-red-500">না (${10 - freeReferrals} আরো প্রয়োজন)</span>`;
+                }
+                
+                // Generate referral links
+                const baseUrl = window.location.origin + window.location.pathname;
+                const paidLink = `${baseUrl}?ref=${userData.referralCode}&type=paid`;
+                const freeLink = `${baseUrl}?ref=${userData.referralCode}&type=free`;
+                
+                document.getElementById('paid-referral-link').value = paidLink;
+                document.getElementById('free-referral-link').value = freeLink;
+                
+                // Update referral bonus amount from config
+                const bonusAmount = appConfig.referralBonus || 30;
+                document.getElementById('referral-bonus-amount').textContent = `${bonusAmount} টাকা`;
+                
+            } else {
+                // Hide referral features for unverified users
+                referralBlockedNotice.classList.remove('hidden');
+                referralStats.classList.add('hidden');
+                referralCodeSection.classList.add('hidden');
+                referralLinksSection.classList.add('hidden');
+                shareBtn.classList.add('hidden');
+            }
+        }
+
+        window.copyReferralLink = function(type) {
+            const linkInput = type === 'paid' ? 
+                document.getElementById('paid-referral-link') : 
+                document.getElementById('free-referral-link');
+            
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                showAlert(`${type === 'paid' ? 'পেইড' : 'ফ্রি'} রেফারেল লিংক কপি হয়েছে!`);
+            } catch (err) {
+                showAlert("লিংক কপি করতে ব্যর্থ।");
+            }
+        };
+
+        function shareReferralCode() {
+            const paidLink = document.getElementById('paid-referral-link').value;
+            const freeLink = document.getElementById('free-referral-link').value;
+            const bonusAmount = appConfig.referralBonus || 30;
+            
+            const text = `CashReward এ যোগ দিন এবং টাকা আয় করুন!
+
+পেইড ভেরিফিকেশন লিংক (${bonusAmount} টাকা বোনাস):
+${paidLink}
+
+ফ্রি একাউন্ট লিংক:
+${freeLink}
+
+আমার রেফারেল কোড: ${userData.referralCode}`;
+
+            if (navigator.share) {
+                navigator.share({ 
+                    title: 'CashReward এ যোগ দিন!', 
+                    text: text, 
+                    url: paidLink 
+                }).catch((error) => console.error("Share failed:", error));
+            } else {
+                copyReferralLink('paid');
+                showAlert("শেয়ার ফিচার উপলব্ধ নেই। পেইড রেফারেল লিংক কপি করা হয়েছে!");
+            }
+        }
+
+        async function handleSignup() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            if (!name || !email || !password) return showAlert("সব ফিল্ড পূরণ করুন।");
+            
+            loader.style.display = 'flex';
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // Check for referral code in URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const referralCode = urlParams.get('ref');
+                const referralType = urlParams.get('type') || 'free';
+                
+                if (referralCode) {
+                    // Apply referral bonus after user creation
+                    setTimeout(() => {
+                        applyReferralBonus(referralCode, false, referralType);
+                    }, 2000);
+                }
+            } catch (error) {
+                showAlert(error.message);
+                loader.style.display = 'none';
+            }
+        }
+
+        async function applyReferralBonus(referrerCode, isManualApply = false, referralType = 'free') {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("referralCode", "==", referrerCode));
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    const referrerDoc = querySnapshot.docs[0];
+                    const referrerRef = doc(db, "users", referrerDoc.id);
+                    const referrerData = referrerDoc.data();
+                    
+                    // Only give immediate bonus for free referrals
+                    if (referralType === 'free') {
+                        await updateDoc(referrerRef, { 
+                            balance: (referrerData.balance || 0) + 100,
+                            freeReferrals: (referrerData.freeReferrals || 0) + 1
+                        });
+                    } else {
+                        // For paid referrals, just track the referral - bonus comes after verification
+                        await updateDoc(referrerRef, { 
+                            freeReferrals: (referrerData.freeReferrals || 0) + 1
+                        });
+                    }
+                    
+                    const newUserRef = doc(db, "users", currentUser.uid);
+                    await updateDoc(newUserRef, { 
+                        balance: (userData.balance || 0) + 100, 
+                        referredBy: referrerCode,
+                        referralType: referralType
+                    });
+                    
+                    // Log referral activity
+                    await addDoc(collection(db, "referral_activities"), {
+                        referrerId: referrerDoc.id,
+                        referrerCode: referrerCode,
+                        referredUserId: currentUser.uid,
+                        referredUserEmail: userData.email,
+                        referralType: referralType,
+                        status: referralType === 'paid' ? 'pending_verification' : 'completed',
+                        createdAt: serverTimestamp()
+                    });
+                    
+                    userData.balance += 100; 
+                    userData.referredBy = referrerCode;
+                    userData.referralType = referralType;
+                    updateUI();
+                    
+                    if(isManualApply) {
+                        showAlert("কোড সফলভাবে ব্যবহার হয়েছে! ১০০ কয়েন পেয়েছেন।");
+                    }
+                } else {
+                    if(isManualApply) showAlert("ভুল রেফারেল কোড।");
+                }
+            } catch(error) {
+                console.error("Error applying referral bonus: ", error);
+                if(isManualApply) showAlert("কোড ব্যবহারে সমস্যা হয়েছে।");
+            }
+        }
+
+        async function processPaidReferralBonus(userId) {
+            try {
+                // Find referral activity for this user
+                const referralQuery = query(
+                    collection(db, "referral_activities"),
+                    where("referredUserId", "==", userId),
+                    where("referralType", "==", "paid"),
+                    where("status", "==", "pending_verification")
+                );
+                
+                const referralSnapshot = await getDocs(referralQuery);
+                
+                if (!referralSnapshot.empty) {
+                    const referralDoc = referralSnapshot.docs[0];
+                    const referralData = referralDoc.data();
+                    
+                    // Update referrer's balance and paid referral count
+                    const referrerRef = doc(db, "users", referralData.referrerId);
+                    const referrerSnap = await getDoc(referrerRef);
+                    
+                    if (referrerSnap.exists()) {
+                        const referrerData = referrerSnap.data();
+                        const bonusAmount = appConfig.referralBonus || 30;
+                        
+                        await updateDoc(referrerRef, {
+                            balance: (referrerData.balance || 0) + bonusAmount,
+                            paidReferrals: (referrerData.paidReferrals || 0) + 1,
+                            referralEarnings: (referrerData.referralEarnings || 0) + bonusAmount
+                        });
+                        
+                        // Update referral activity status
+                        await updateDoc(doc(db, "referral_activities", referralDoc.id), {
+                            status: 'completed',
+                            completedAt: serverTimestamp(),
+                            bonusAmount: bonusAmount
+                        });
+                        
+                        // Log the bonus transaction
+                        await addDoc(collection(db, "balance_changes"), {
+                            userId: referralData.referrerId,
+                            userName: referrerData.name || 'Unknown',
+                            previousBalance: referrerData.balance || 0,
+                            newBalance: (referrerData.balance || 0) + bonusAmount,
+                            changeAmount: bonusAmount,
+                            reason: 'Paid referral bonus',
+                            referredUserId: userId,
+                            changedAt: serverTimestamp()
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error processing paid referral bonus:", error);
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) return showAlert("সব ফিল্ড পূরণ করুন।");
+
+            loader.style.display = 'flex';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showAlert(error.message);
+                loader.style.display = 'none';
+            }
+        }
+
+        async function handleLogout() {
+            loader.style.display = 'flex';
+            try {
+                await signOut(auth);
+            } catch (error) {
+                showAlert(error.message);
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function showMainPage(pageId) {
+            document.querySelectorAll('.main-page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        window.navigateTo = function(pageId) {
+            document.querySelectorAll('.sub-page').forEach(page => page.classList.remove('active'));
+            document.querySelector('.bottom-nav a.active')?.classList.remove('active');
+            document.querySelector(`.bottom-nav a[data-page="${pageId}"]`)?.classList.add('active');
+            document.getElementById(pageId).classList.add('active');
+            lucide.createIcons();
+        }
+
+        window.showAlert = function(message) {
+            document.getElementById('alert-message').textContent = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+            document.getElementById('alert-ok-btn').onclick = () => {
+                document.getElementById('custom-alert').classList.add('hidden');
+            };
+        }
+
+        async function checkNewNotifications() {
+            if (!currentUser || !userData) return;
+            const lastCheck = userData.lastNotificationCheck ? new Date(userData.lastNotificationCheck.seconds * 1000) : new Date(0);
+            const now = new Date();
+            const notificationsRef = collection(db, "notifications");
+            const q = query(notificationsRef, where("userId", "==", currentUser.uid), where("createdAt", ">", lastCheck), orderBy("createdAt", "desc"));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    notificationDot.style.display = 'block';
+                } else {
+                    notificationDot.style.display = 'none';
+                }
+
+                // Update last check timestamp
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, { lastNotificationCheck: now });
+                userData.lastNotificationCheck = now;
+            } catch (error) {
+                console.error("Error checking notifications:", error);
+            }
+        }
+
+        async function loadNotifications() {
+            if (!currentUser) return;
+            notificationDot.style.display = 'none';
+            const notificationsList = document.getElementById('notifications-list');
+            notificationsList.innerHTML = '<p class="text-center text-gray-400">Loading notifications...</p>';
+
+            const notificationsRef = collection(db, "notifications");
+            const q = query(notificationsRef, where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"), limit(20));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    notificationsList.innerHTML = '';
+                    querySnapshot.forEach(doc => {
+                        const notification = doc.data();
+                        const notificationDiv = document.createElement('div');
+                        notificationDiv.className = 'card-bg p-3 rounded-lg';
+                        notificationDiv.innerHTML = `
+                            <h3 class="font-semibold">${notification.title}</h3>
+                            <p class="text-sm text-gray-400">${notification.message}</p>
+                            <p class="text-xs text-gray-500">${formatDate(notification.createdAt)}</p>
+                        `;
+                        notificationsList.appendChild(notificationDiv);
+                    });
+                } else {
+                    notificationsList.innerHTML = '<p class="text-center text-gray-400">No notifications found.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading notifications:", error);
+                notificationsList.innerHTML = '<p class="text-center text-gray-400">Failed to load notifications.</p>';
+            }
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp || !timestamp.toDate) return 'N/A';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        function copyReferralCode() {
+            const referralCode = referralCodeEl.textContent;
+            navigator.clipboard.writeText(referralCode)
+                .then(() => showAlert('Referral code copied!'))
+                .catch(err => console.error('Failed to copy referral code: ', err));
+        }
+
+        async function handleWithdrawal() {
+            const amount = document.getElementById('withdraw-amount').value;
+            const method = document.getElementById('withdraw-method').value;
+            const paymentDetails = getPaymentDetails();
+
+            if (!amount || !method || !paymentDetails) return showAlert("সব ফিল্ড পূরণ করুন।");
+            if (amount < appConfig.minWithdrawal) return showAlert(`Minimum withdrawal amount is ${appConfig.minWithdrawal} coins.`);
+            if (amount > userData.balance) return showAlert("Insufficient balance.");
+
+            loader.style.display = 'flex';
+            try {
+                // Create withdrawal request
+                await addDoc(collection(db, "withdrawals"), {
+                    userId: currentUser.uid,
+                    userName: userData.name,
+                    userEmail: userData.email,
+                    amount: parseInt(amount),
+                    method: method,
+                    paymentDetails: paymentDetails,
+                    status: 'pending',
+                    requestedAt: serverTimestamp()
+                });
+
+                // Update user balance
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, { balance: increment(-parseInt(amount)) });
+                userData.balance -= parseInt(amount);
+                updateUI();
+
+                showAlert("Withdrawal request submitted successfully!");
+            } catch (error) {
+                console.error("Error submitting withdrawal request:", error);
+                showAlert("Failed to submit withdrawal request.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        function getPaymentDetails() {
+            const method = document.getElementById('withdraw-method').value;
+            let details = {};
+
+            switch (method) {
+                case 'Bkash':
+                case 'Nagad':
+                    details.number = document.getElementById('payment-number-bkash-nagad').value;
+                    break;
+                case 'UPI':
+                case 'Paytm':
+                    details.id = document.getElementById('payment-id-upi-paytm').value;
+                    break;
+                default:
+                    return null;
+            }
+
+            for (const key in details) {
+                if (!details[key]) return null;
+            }
+
+            return details;
+        }
+
+        async function loadWithdrawalHistory() {
+            const withdrawalHistoryList = document.getElementById('withdrawal-history-list');
+            withdrawalHistoryList.innerHTML = '<p class="text-center text-gray-400">Loading history...</p>';
+
+            const withdrawalsRef = collection(db, "withdrawals");
+            const q = query(withdrawalsRef, where("userId", "==", currentUser.uid), orderBy("requestedAt", "desc"), limit(10));
+
+            try {
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    withdrawalHistoryList.innerHTML = '';
+                    querySnapshot.forEach(doc => {
+                        const withdrawal = doc.data();
+                        const withdrawalDiv = document.createElement('div');
+                        withdrawalDiv.className = 'card-bg p-3 rounded-lg';
+                        withdrawalDiv.innerHTML = `
+                            <p class="font-semibold">Amount: ${withdrawal.amount} Coins</p>
+                            <p class="text-sm text-gray-400">Method: ${withdrawal.method}</p>
+                            <p class="text-sm text-gray-400">Status: ${withdrawal.status}</p>
+                            <p class="text-xs text-gray-500">Requested: ${formatDate(withdrawal.requestedAt)}</p>
+                        `;
+                        withdrawalHistoryList.appendChild(withdrawalDiv);
+                    });
+                } else {
+                    withdrawalHistoryList.innerHTML = '<p class="text-center text-gray-400">No history found.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading withdrawal history:", error);
+                withdrawalHistoryList.innerHTML = '<p class="text-center text-gray-400">Failed to load history.</p>';
+            }
+        }
+
+        async function handleApplyReferralCode() {
+            const referralCode = document.getElementById('enter-referral-code').value.trim().toUpperCase();
+            if (!referralCode) return showAlert("Enter referral code.");
+            if (userData.referredBy) return showAlert("You have already used a referral code.");
+            loader.style.display = 'flex';
+            applyReferralBonus(referralCode, true);
+            loader.style.display = 'none';
+        }
+
+        function updateDynamicPaymentFields() {
+            const method = document.getElementById('withdraw-method').value;
+            paymentDetailsContainer.innerHTML = '';
+
+            switch (method) {
+                case 'Bkash':
+                case 'Nagad':
+                    paymentDetailsContainer.innerHTML = `
+                        <input type="tel" id="payment-number-bkash-nagad" placeholder="${method} Number" class="w-full p-3 rounded-lg input-field mb-3">
+                    `;
+                    break;
+                case 'UPI':
+                case 'Paytm':
+                    paymentDetailsContainer.innerHTML = `
+                        <input type="text" id="payment-id-upi-paytm" placeholder="${method} ID" class="w-full p-3 rounded-lg input-field mb-3">
+                    `;
+                    break;
+            }
+        }
+
+        async function updateAdsLeftCount() {
+            if (!userData) return;
+            const today = new Date().toISOString().split('T')[0];
+            if (userData.lastAdWatchDate !== today) {
+                userData.dailyAdCount = 0;
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, { dailyAdCount: 0, lastAdWatchDate: today });
+            }
+            const adsLeft = (appConfig.dailyAdLimit || 10) - (userData.dailyAdCount || 0);
+            adsLeftCountEl.textContent = adsLeft > 0 ? adsLeft : 0;
+        }
+
+        async function claimReward(type) {
+            if (!currentUser || !userData) return;
+            const today = new Date().toISOString().split('T')[0];
+            if (userData.lastAdWatchDate !== today) {
+                userData.dailyAdCount = 0;
+            }
+            if (userData.dailyAdCount >= (appConfig.dailyAdLimit || 10)) {
+                return showAlert("Aaj aap ads dekhne ki limit tak pahunch gaye hain.");
+            }
+
+            loader.style.display = 'flex';
+            try {
+                userData.dailyAdCount = (userData.dailyAdCount || 0) + 1;
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    balance: increment(50),
+                    dailyAdCount: increment(1),
+                    lastAdWatchDate: today
+                });
+                userData.balance += 50;
+                updateUI();
+                showAlert("Reward claimed! 50 coins added to your balance.");
+            } catch (error) {
+                console.error("Error claiming reward:", error);
+                showAlert("Reward claim karne mein error aayi.");
+            } finally {
+                loader.style.display = 'none';
+                updateAdsLeftCount();
+            }
+        }
+
+        function checkAdminAccess() {
+            const adminAccessDiv = document.getElementById('admin-access');
+            if (userData && userData.email === 'admin@cashreward.com') {
+                adminAccessDiv.classList.remove('hidden');
+                loadAdminStats();
+            } else {
+                adminAccessDiv.classList.add('hidden');
+            }
+        }
+
+        async function loadAdminStats() {
+            const totalUsersEl = document.getElementById('admin-total-users');
+            const jobsTodayEl = document.getElementById('admin-jobs-today');
+            const totalCoinsEl = document.getElementById('admin-total-coins');
+            const pendingWithdrawalsEl = document.getElementById('admin-pending-withdrawals');
+
+            try {
+                // Total Users
+                const usersSnapshot = await getDocs(collection(db, "users"));
+                totalUsersEl.textContent = usersSnapshot.size;
+
+                // Jobs Completed Today
+                const today = new Date().toISOString().split('T')[0];
+                const jobsQuery = query(collection(db, "balance_changes"), where("reason", "==", "Ad Reward"), where("changedAt", ">=", new Date(today)));
+                const jobsSnapshot = await getDocs(jobsQuery);
+                jobsTodayEl.textContent = jobsSnapshot.size;
+
+                // Total Coins Earned
+                let totalCoins = 0;
+                usersSnapshot.forEach(userDoc => {
+                    const user = userDoc.data();
+                    totalCoins += user.balance || 0;
+                });
+                totalCoinsEl.textContent = totalCoins;
+
+                // Pending Withdrawals
+                const withdrawalsQuery = query(collection(db, "withdrawals"), where("status", "==", "pending"));
+                const withdrawalsSnapshot = await getDocs(withdrawalsQuery);
+                pendingWithdrawalsEl.textContent = withdrawalsSnapshot.size;
+
+            } catch (error) {
+                console.error("Error loading admin stats:", error);
+                showAlert("Failed to load admin stats.");
+            }
+        }
+
+        window.showAdminTab = function(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('bg-purple-600', 'text-white'));
+
+            document.getElementById(`admin-${tabId}-tab`).classList.remove('hidden');
+            document.getElementById(`${tabId}-tab`).classList.add('bg-purple-600', 'text-white');
+
+            if (tabId === 'jobs') loadJobSettings();
+            if (tabId === 'users') searchUsers();
+            if (tabId === 'verification') loadPendingVerifications();
+            if (tabId === 'notifications') loadNotificationsManagement();
+            if (tabId === 'config') loadConfiguration();
+            if (tabId === 'withdrawals') loadPendingWithdrawals();
+            if (tabId === 'pro-jobs') loadPendingProJobSubmissions();
+        }
+
+        async function loadJobSettings() {
+            const jobSelect = document.getElementById('admin-job-select');
+            jobSelect.innerHTML = '<option value="">Loading jobs...</option>';
+
+            try {
+                const jobsSnapshot = await getDocs(collection(db, "jobs"));
+                jobSelect.innerHTML = '<option value="">Select Job to Edit</option>';
+                jobsSnapshot.forEach(jobDoc => {
+                    const job = jobDoc.data();
+                    const option = document.createElement('option');
+                    option.value = jobDoc.id;
+                    option.textContent = job.name;
+                    jobSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error loading job settings:", error);
+                jobSelect.innerHTML = '<option value="">Failed to load jobs.</option>';
+            }
+        }
+
+        window.saveJobSettings = async function() {
+            const jobId = document.getElementById('admin-job-select').value;
+            const jobName = document.getElementById('admin-job-name').value;
+            const jobLink = document.getElementById('admin-job-link').value;
+
+            if (!jobName || !jobLink) return showAlert("Please fill all job details.");
+
+            try {
+                if (jobId) {
+                    // Update existing job
+                    const jobRef = doc(db, "jobs", jobId);
+                    await updateDoc(jobRef, { name: jobName, link: jobLink });
+                    showAlert("Job updated successfully!");
+                } else {
+                    // Add new job
+                    await addDoc(collection(db, "jobs"), { name: jobName, link: jobLink });
+                    showAlert("Job added successfully!");
+                }
+                loadJobSettings();
+            } catch (error) {
+                console.error("Error saving job settings:", error);
+                showAlert("Failed to save job settings.");
+            }
+        }
+
+        window.resetJobForm = function() {
+            document.getElementById('admin-job-select').value = '';
+            document.getElementById('admin-job-name').value = '';
+            document.getElementById('admin-job-link').value = '';
+        }
+
+        window.searchUsers = async function() {
+            const searchTerm = document.getElementById('admin-user-search').value.trim().toLowerCase();
+            const usersList = document.getElementById('admin-users-list');
+            usersList.innerHTML = '<p class="text-center text-gray-400">Searching users...</p>';
+
+            try {
+                const usersRef = collection(db, "users");
+                let q;
+
+                if (searchTerm) {
+                    q = query(usersRef,
+                        where("name", ">=", searchTerm),
+                        where("name", "<=", searchTerm + '\uf8ff')
+                    );
+                } else {
+                    q = query(usersRef, orderBy("createdAt", "desc"), limit(20));
+                }
+
+                const usersSnapshot = await getDocs(q);
+                if (!usersSnapshot.empty) {
+                    usersList.innerHTML = '';
+                    usersSnapshot.forEach(userDoc => {
+                        const user = userDoc.data();
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'card-bg p-3 rounded-lg flex items-center justify-between';
+                        userDiv.innerHTML = `
+                            <div>
+                                <p class="font-semibold">${user.name}</p>
+                                <p class="text-sm text-gray-400">${user.email}</p>
+                            </div>
+                            <button onclick="blockUser('${userDoc.id}', ${!user.isBlocked})" class="btn-outline-accent px-4 py-2 rounded-lg">${user.isBlocked ? 'Unblock' : 'Block'}</button>
+                        `;
+                        usersList.appendChild(userDiv);
+                    });
+                } else {
+                    usersList.innerHTML = '<p class="text-center text-gray-400">No users found.</p>';
+                }
+            } catch (error) {
+                console.error("Error searching users:", error);
+                usersList.innerHTML = '<p class="text-center text-gray-400">Failed to search users.</p>';
+            }
+        }
+
+        window.blockUser = async function(userId, shouldBlock) {
+            try {
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, { isBlocked: shouldBlock });
+                showAlert(`User ${shouldBlock ? 'blocked' : 'unblocked'} successfully!`);
+                searchUsers();
+            } catch (error) {
+                console.error("Error blocking/unblocking user:", error);
+                showAlert("Failed to block/unblock user.");
+            }
+        }
+
+        async function loadPendingVerifications() {
+            const verificationList = document.getElementById('admin-verification-list');
+            verificationList.innerHTML = '<p class="text-center text-gray-400">Loading verification requests...</p>';
+
+            try {
+                // Load verification statistics
+                await loadVerificationStats();
+
+                // Load pending verification requests
+                const verificationsQuery = query(
+                    collection(db, "verification_requests"),
+                    where("status", "==", "pending"),
+                    orderBy("requestedAt", "desc")
+                );
+                const verificationsSnapshot = await getDocs(verificationsQuery);
+
+                if (!verificationsSnapshot.empty) {
+                    verificationList.innerHTML = '';
+                    verificationsSnapshot.forEach(verificationDoc => {
+                        const verification = verificationDoc.data();
+                        const verificationDiv = document.createElement('div');
+                        verificationDiv.className = 'card-bg p-4 rounded-lg border border-yellow-500';
+                        verificationDiv.innerHTML = `
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-lg">${verification.userName}</h4>
+                                    <p class="text-sm text-gray-400">${verification.userEmail}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold">PENDING</span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <p class="text-sm text-gray-400">Payment Method</p>
+                                    <p class="font-semibold capitalize">${verification.paymentMethod}</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-400">Sender Number</p>
+                                    <p class="font-semibold">${verification.senderNumber}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <p class="text-sm text-gray-400">Transaction ID</p>
+                                <p class="font-semibold bg-gray-700 p-2 rounded">${verification.transactionId}</p>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <p class="text-sm text-gray-400">Requested At</p>
+                                <p class="text-sm">${formatDate(verification.requestedAt)}</p>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button onclick="approveVerification('${verificationDoc.id}', '${verification.userId}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                    Approve
+                                </button>
+                                <button onclick="rejectVerification('${verificationDoc.id}', '${verification.userId}')" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                    Reject
+                                </button>
+                            </div>
+                        `;
+                        verificationList.appendChild(verificationDiv);
+                    });
+                } else {
+                    verificationList.innerHTML = '<p class="text-center text-gray-400">No pending verification requests.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading pending verifications:", error);
+                verificationList.innerHTML = '<p class="text-center text-gray-400">Failed to load verification requests.</p>';
+            }
+        }
+
+        async function loadVerificationStats() {
+            try {
+                // Count pending verifications
+                const pendingQuery = query(collection(db, "verification_requests"), where("status", "==", "pending"));
+                const pendingSnapshot = await getDocs(pendingQuery);
+                document.getElementById('pending-verifications-count').textContent = pendingSnapshot.size;
+
+                // Count approved verifications
+                const approvedQuery = query(collection(db, "verification_requests"), where("status", "==", "approved"));
+                const approvedSnapshot = await getDocs(approvedQuery);
+                document.getElementById('approved-verifications-count').textContent = approvedSnapshot.size;
+
+                // Count rejected verifications
+                const rejectedQuery = query(collection(db, "verification_requests"), where("status", "==", "rejected"));
+                const rejectedSnapshot = await getDocs(rejectedQuery);
+                document.getElementById('rejected-verifications-count').textContent = rejectedSnapshot.size;
+
+            } catch (error) {
+                console.error("Error loading verification stats:", error);
+            }
+        }
+
+        window.approveVerification = async function(verificationId, userId) {
+            if (!confirm("Are you sure you want to approve this verification request?")) {
+                return;
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Update verification request status
+                const verificationRef = doc(db, "verification_requests", verificationId);
+                await updateDoc(verificationRef, { 
+                    status: 'approved',
+                    approvedAt: serverTimestamp(),
+                    approvedBy: currentUser.uid
+                });
+
+                // Update user verification status
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, {
+                    verificationStatus: 'verified',
+                    isVerified: true,
+                    verifiedAt: serverTimestamp()
+                });
+
+                // Process paid referral bonus if user was referred
+                await processPaidReferralBonus(userId);
+
+                // Send notification to user
+                await addDoc(collection(db, "notifications"), {
+                    userId: userId,
+                    title: "Account Verified!",
+                    message: "Congratulations! Your account has been successfully verified. You can now access all premium features including referral system.",
+                    type: "verification_approved",
+                    createdAt: serverTimestamp()
+                });
+
+                showAlert("Verification approved successfully! User has been notified.");
+                loadPendingVerifications();
+                
+            } catch (error) {
+                console.error("Error approving verification:", error);
+                showAlert("Failed to approve verification request.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        window.rejectVerification = async function(verificationId, userId) {
+            const reason = prompt("Please enter the reason for rejection (optional):");
+            
+            if (!confirm("Are you sure you want to reject this verification request?")) {
+                return;
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Update verification request status
+                const verificationRef = doc(db, "verification_requests", verificationId);
+                await updateDoc(verificationRef, { 
+                    status: 'rejected',
+                    rejectedAt: serverTimestamp(),
+                    rejectedBy: currentUser.uid,
+                    rejectionReason: reason || 'No reason provided'
+                });
+
+                // Update user verification status back to unverified
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, {
+                    verificationStatus: 'unverified',
+                    isVerified: false
+                });
+
+                // Send notification to user
+                await addDoc(collection(db, "notifications"), {
+                    userId: userId,
+                    title: "Verification Rejected",
+                    message: `Your verification request has been rejected. ${reason ? 'Reason: ' + reason : 'Please check your payment details and try again.'}`,
+                    type: "verification_rejected",
+                    createdAt: serverTimestamp()
+                });
+
+                showAlert("Verification rejected successfully! User has been notified.");
+                loadPendingVerifications();
+                
+            } catch (error) {
+                console.error("Error rejecting verification:", error);
+                showAlert("Failed to reject verification request.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function loadPendingWithdrawals() {
+            const withdrawalsList = document.getElementById('admin-withdrawals-list');
+            withdrawalsList.innerHTML = '<p class="text-center text-gray-400">Loading withdrawals...</p>';
+
+            try {
+                const withdrawalsQuery = query(collection(db, "withdrawals"), where("status", "==", "pending"), orderBy("requestedAt", "desc"));
+                const withdrawalsSnapshot = await getDocs(withdrawalsQuery);
+
+                if (!withdrawalsSnapshot.empty) {
+                    withdrawalsList.innerHTML = '';
+                    withdrawalsSnapshot.forEach(withdrawalDoc => {
+                        const withdrawal = withdrawalDoc.data();
+                        const withdrawalDiv = document.createElement('div');
+                        withdrawalDiv.className = 'card-bg p-3 rounded-lg';
+                        withdrawalDiv.innerHTML = `
+                            <p class="font-semibold">Amount: ${withdrawal.amount} Coins</p>
+                            <p class="text-sm text-gray-400">Method: ${withdrawal.method}</p>
+                            <p class="text-sm text-gray-400">User: ${withdrawal.userName} (${withdrawal.userEmail})</p>
+                            <p class="text-xs text-gray-500">Requested: ${formatDate(withdrawal.requestedAt)}</p>
+                            <div class="flex space-x-2 mt-2">
+                                <button onclick="approveWithdrawal('${withdrawalDoc.id}')" class="flex-1 btn-accent px-4 py-2 rounded-lg">Approve</button>
+                                <button onclick="rejectWithdrawal('${withdrawalDoc.id}')" class="flex-1 btn-outline-accent px-4 py-2 rounded-lg">Reject</button>
+                            </div>
+                        `;
+                        withdrawalsList.appendChild(withdrawalDiv);
+                    });
+                } else {
+                    withdrawalsList.innerHTML = '<p class="text-center text-gray-400">No pending withdrawals.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading pending withdrawals:", error);
+                withdrawalsList.innerHTML = '<p class="text-center text-gray-400">Failed to load pending withdrawals.</p>';
+            }
+        }
+
+        window.approveWithdrawal = async function(withdrawalId) {
+            try {
+                const withdrawalRef = doc(db, "withdrawals", withdrawalId);
+                await updateDoc(withdrawalRef, { status: 'approved' });
+                showAlert("Withdrawal approved successfully!");
+                loadPendingWithdrawals();
+            } catch (error) {
+                console.error("Error approving withdrawal:", error);
+                showAlert("Failed to approve withdrawal.");
+            }
+        }
+
+        window.rejectWithdrawal = async function(withdrawalId) {
+            try {
+                const withdrawalRef = doc(db, "withdrawals", withdrawalId);
+                await updateDoc(withdrawalRef, { status: 'rejected' });
+                showAlert("Withdrawal rejected successfully!");
+                loadPendingWithdrawals();
+            } catch (error) {
+                console.error("Error rejecting withdrawal:", error);
+                showAlert("Failed to reject withdrawal.");
+            }
+        }
+
+        async function loadPendingProJobSubmissions() {
+            const proJobsList = document.getElementById('admin-pro-jobs-list');
+            proJobsList.innerHTML = '<p class="text-center text-gray-400">Loading submissions...</p>';
+
+            try {
+                const proJobsQuery = query(
+                    collection(db, "pro_job_submissions"),
+                    where("status", "==", "pending"),
+                    orderBy("submittedAt", "desc")
+                );
+                const proJobsSnapshot = await getDocs(proJobsQuery);
+
+                if (!proJobsSnapshot.empty) {
+                    proJobsList.innerHTML = '';
+                    proJobsSnapshot.forEach(jobDoc => {
+                        const job = jobDoc.data();
+                        const jobDiv = document.createElement('div');
+                        jobDiv.className = 'card-bg p-3 rounded-lg';
+                        jobDiv.innerHTML = `
+                            <p class="font-semibold">User: ${job.userName} (${job.userEmail})</p>
+                            <p class="text-sm text-gray-400">Job: ${job.jobName}</p>
+                            <p class="text-xs text-gray-500">Submitted: ${formatDate(job.submittedAt)}</p>
+                            <div class="flex space-x-2 mt-2">
+                                <button onclick="approveProJobSubmission('${jobDoc.id}', '${job.userId}')" class="flex-1 btn-accent px-4 py-2 rounded-lg">Approve</button>
+                                <button onclick="rejectProJobSubmission('${jobDoc.id}')" class="flex-1 btn-outline-accent px-4 py-2 rounded-lg">Reject</button>
+                            </div>
+                        `;
+                        proJobsList.appendChild(jobDiv);
+                    });
+                } else {
+                    proJobsList.innerHTML = '<p class="text-center text-gray-400">No pending pro job submissions.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading pending pro job submissions:", error);
+                proJobsList.innerHTML = '<p class="text-center text-gray-400">Failed to load submissions.</p>';
+            }
+        }
+
+        window.approveProJobSubmission = async function(submissionId, userId) {
+            try {
+                const submissionRef = doc(db, "pro_job_submissions", submissionId);
+                await updateDoc(submissionRef, { status: 'approved' });
+
+                // Update user balance
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, { balance: increment(500) });
+
+                // Process paid referral bonus if applicable
+                await processPaidReferralBonus(userId);
+
+                showAlert("Pro job submission approved successfully! 500 coins added to user balance.");
+                loadPendingProJobSubmissions();
+            } catch (error) {
+                console.error("Error approving pro job submission:", error);
+                showAlert("Failed to approve pro job submission.");
+            }
+        }
+
+        window.rejectProJobSubmission = async function(submissionId) {
+            try {
+                const submissionRef = doc(db, "pro_job_submissions", submissionId);
+                await updateDoc(submissionRef, { status: 'rejected' });
+                showAlert("Pro job submission rejected successfully!");
+                loadPendingProJobSubmissions();
+            } catch (error) {
+                console.error("Error rejecting pro job submission:", error);
+                showAlert("Failed to reject pro job submission.");
+            }
+        }
+
+        async function setupDailyJobs() {
+            const dailyJobsContainer = document.getElementById('daily-jobs-container');
+            dailyJobsContainer.innerHTML = '<p class="text-center text-gray-400">Loading jobs...</p>';
+
+            try {
+                const jobsSnapshot = await getDocs(collection(db, "jobs"));
+                if (!jobsSnapshot.empty) {
+                    dailyJobsContainer.innerHTML = '';
+                    jobsSnapshot.forEach(jobDoc => {
+                        const job = jobDoc.data();
+                        const jobButton = document.createElement('button');
+                        jobButton.className = 'bg-gradient-to-r from-green-600 to-green-700 p-3 rounded-lg flex items-center justify-between text-white btn';
+                        jobButton.innerHTML = `
+                            <div class="flex items-center space-x-3"><span class="text-3xl">🔗</span><div><h3 class="font-bold">${job.name}</h3><p class="text-xs font-medium">Visit & Earn 10 Coins</p></div></div>
+                            <span>Available</span>
+                        `;
+                        jobButton.onclick = () => startJob(jobDoc.id, job.link, job.name);
+                        dailyJobsContainer.appendChild(jobButton);
+                    });
+                } else {
+                    dailyJobsContainer.innerHTML = '<p class="text-center text-gray-400">No jobs available.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading daily jobs:", error);
+                dailyJobsContainer.innerHTML = '<p class="text-center text-gray-400">Failed to load jobs.</p>';
+            }
+        }
+
+        async function startJob(jobId, jobLink, jobName) {
+            if (currentJobTracking) {
+                return showAlert("Please complete the current job first.");
+            }
+
+            currentJobTracking = {
+                jobId: jobId,
+                startTime: new Date(),
+                jobLink: jobLink,
+                jobName: jobName
+            };
+
+            window.open(jobLink, '_blank');
+            showAlert(`Job started! Please visit the link for at least 15 seconds. After 15 seconds, click the "Claim Reward" button.`);
+            setTimeout(() => {
+                claimJobReward();
+            }, 15000);
+        }
+
+        async function claimJobReward() {
+            if (!currentJobTracking) {
+                return showAlert("No job in progress.");
+            }
+
+            const endTime = new Date();
+            const duration = (endTime.getTime() - currentJobTracking.startTime.getTime()) / 1000;
+
+            if (duration < 15) {
+                return showAlert("Please visit the link for at least 15 seconds before claiming the reward.");
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Update user balance
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, { balance: increment(10) });
+                userData.balance += 10;
+                updateUI();
+
+                // Log balance change
+                await addDoc(collection(db, "balance_changes"), {
+                    userId: currentUser.uid,
+                    userName: userData.name,
+                    previousBalance: userData.balance - 10,
+                    newBalance: userData.balance,
+                    changeAmount: 10,
+                    reason: 'Ad Reward',
+                    jobId: currentJobTracking.jobId,
+                    jobName: currentJobTracking.jobName,
+                    changedAt: serverTimestamp()
+                });
+
+                showAlert("Reward claimed! 10 coins added to your balance.");
+            } catch (error) {
+                console.error("Error claiming job reward:", error);
+                showAlert("Failed to claim job reward.");
+            } finally {
+                loader.style.display = 'none';
+                currentJobTracking = null;
+            }
+        }
+
+        async function setupProJobs() {
+            const proJobsContainer = document.getElementById('pro-jobs-container');
+            proJobsContainer.innerHTML = '<p class="text-center text-gray-400">Loading jobs...</p>';
+
+            try {
+                const jobsSnapshot = await getDocs(collection(db, "pro_jobs"));
+                if (!jobsSnapshot.empty) {
+                    proJobsContainer.innerHTML = '';
+                    jobsSnapshot.forEach(jobDoc => {
+                        const job = jobDoc.data();
+                        const jobButton = document.createElement('button');
+                        jobButton.className = 'bg-gradient-to-r from-red-600 to-pink-600 p-3 rounded-lg flex items-center justify-between text-white btn';
+                        jobButton.innerHTML = `
+                            <div class="flex items-center space-x-3"><span class="text-3xl">💼</span><div><h3 class="font-bold">${job.name}</h3><p class="text-xs font-medium">Sign Up & Earn Big Rewards</p></div></div>
+                            <span>Available</span>
+                        `;
+                        jobButton.onclick = () => openProJobModal(jobDoc.id, job.name, job.link);
+                        proJobsContainer.appendChild(jobButton);
+                    });
+                } else {
+                    proJobsContainer.innerHTML = '<p class="text-center text-gray-400">No pro jobs available.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading pro jobs:", error);
+                proJobsContainer.innerHTML = '<p class="text-center text-gray-400">Failed to load pro jobs.</p>';
+            }
+        }
+
+        window.openProJobModal = function(jobId, jobName, jobLink) {
+            currentProJobId = jobId;
+            document.getElementById('pro-job-modal-title').textContent = `Submit Screenshots for ${jobName}`;
+            document.getElementById('pro-job-link').href = jobLink;
+            document.getElementById('pro-job-link').textContent = jobLink;
+            document.getElementById('pro-job-submission-modal').classList.remove('hidden');
+        }
+
+        window.closeProJobModal = function() {
+            document.getElementById('pro-job-submission-modal').classList.add('hidden');
+        }
+
+        window.submitProJobScreenshots = async function() {
+            const beforeScreenshotURL = document.getElementById('before-screenshot-url').value;
+            const afterScreenshotURL = document.getElementById('after-screenshot-url').value;
+
+            if (!beforeScreenshotURL || !afterScreenshotURL) {
+                return showAlert("Please provide both screenshots.");
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Get the pro job details
+                const jobRef = doc(db, "pro_jobs", currentProJobId);
+                const jobSnap = await getDoc(jobRef);
+                const jobData = jobSnap.data();
+
+                // Submit the pro job
+                await addDoc(collection(db, "pro_job_submissions"), {
+                    userId: currentUser.uid,
+                    userName: userData.name,
+                    userEmail: userData.email,
+                    jobId: currentProJobId,
+                    jobName: jobData.name,
+                    beforeScreenshotURL: beforeScreenshotURL,
+                    afterScreenshotURL: afterScreenshotURL,
+                    status: 'pending',
+                    submittedAt: serverTimestamp()
+                });
+
+                showAlert("Pro job submission successful! Your submission is under review.");
+                closeProJobModal();
+            } catch (error) {
+                console.error("Error submitting pro job:", error);
+                showAlert("Failed to submit pro job.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function loadConfiguration() {
+            try {
+                const config = JSON.parse(localStorage.getItem('appConfig') || '{}');
+                
+                // Set default values if not found
+                const defaults = {
+                    referralBonus: 30,
+                    verificationFee: 50,
+                    minFreeReferrals: 10,
+                    freeReferralBonus: 100,
+                    bkashNumber: '01XXXXXXXXX',
+                    nagadNumber: '01XXXXXXXXX',
+                    minWithdrawal: 5000,
+                    dailyAdLimit: 10,
+                    coinValueCoins: 1000,
+                    coinValueInr: 10
+                };
+
+                const finalConfig = { ...defaults, ...config };
+
+                // Update form fields
+                document.getElementById('config-referral-bonus').value = finalConfig.referralBonus;
+                document.getElementById('config-verification-fee').value = finalConfig.verificationFee;
+                document.getElementById('config-min-free-referrals').value = finalConfig.minFreeReferrals;
+                document.getElementById('config-free-referral-bonus').value = finalConfig.freeReferralBonus;
+                document.getElementById('config-bkash-number').value = finalConfig.bkashNumber;
+                document.getElementById('config-nagad-number').value = finalConfig.nagadNumber;
+                document.getElementById('config-min-withdrawal').value = finalConfig.minWithdrawal;
+                document.getElementById('config-daily-ad-limit').value = finalConfig.dailyAdLimit;
+                document.getElementById('config-coin-value-coins').value = finalConfig.coinValueCoins;
+                document.getElementById('config-coin-value-inr').value = finalConfig.coinValueInr;
+
+                document.getElementById('config-status').textContent = 'Configuration loaded successfully.';
+                document.getElementById('config-status').className = 'text-sm text-green-400';
+            } catch (error) {
+                document.getElementById('config-status').textContent = 'Error loading configuration.';
+                document.getElementById('config-status').className = 'text-sm text-red-400';
+            }
+        }
+
+        async function saveConfiguration() {
+            try {
+                const config = {
+                    referralBonus: parseInt(document.getElementById('config-referral-bonus').value) || 30,
+                    verificationFee: parseInt(document.getElementById('config-verification-fee').value) || 50,
+                    minFreeReferrals: parseInt(document.getElementById('config-min-free-referrals').value) || 10,
+                    freeReferralBonus: parseInt(document.getElementById('config-free-referral-bonus').value) || 100,
+                    bkashNumber: document.getElementById('config-bkash-number').value || '01XXXXXXXXX',
+                    nagadNumber: document.getElementById('config-nagad-number').value || '01XXXXXXXXX',
+                    minWithdrawal: parseInt(document.getElementById('config-min-withdrawal').value) || 5000,
+                    dailyAdLimit: parseInt(document.getElementById('config-daily-ad-limit').value) || 10,
+                    coinValueCoins: parseInt(document.getElementById('config-coin-value-coins').value) || 1000,
+                    coinValueInr: parseInt(document.getElementById('config-coin-value-inr').value) || 10
+                };
+
+                localStorage.setItem('appConfig', JSON.stringify(config));
+                
+                document.getElementById('config-status').textContent = 'Configuration saved successfully!';
+                document.getElementById('config-status').className = 'text-sm text-green-400';
+
+                // Update global config object
+                window.appConfig = config;
+                
+                setTimeout(() => {
+                    document.getElementById('config-status').textContent = 'Configuration loaded successfully.';
+                    document.getElementById('config-status').className = 'text-sm text-gray-400';
+                }, 3000);
+            } catch (error) {
+                document.getElementById('config-status').textContent = 'Error saving configuration.';
+                document.getElementById('config-status').className = 'text-sm text-red-400';
+            }
+        }
+
+        function getConfig() {
+            if (!window.appConfig) {
+                window.appConfig = JSON.parse(localStorage.getItem('appConfig') || '{}');
+                const defaults = {
+                    referralBonus: 30,
+                    verificationFee: 50,
+                    minFreeReferrals: 10,
+                    freeReferralBonus: 100,
+                    bkashNumber: '01XXXXXXXXX',
+                    nagadNumber: '01XXXXXXXXX',
+                    minWithdrawal: 5000,
+                    dailyAdLimit: 10,
+                    coinValueCoins: 1000,
+                    coinValueInr: 10
+                };
+                window.appConfig = { ...defaults, ...window.appConfig };
+            }
+            return window.appConfig;
+        }
+
+        function showVerificationModal() {
+            const config = getConfig();
+            document.getElementById('verification-fee-amount').textContent = config.verificationFee;
+            document.getElementById('bkash-number-display').textContent = config.bkashNumber;
+            document.getElementById('nagad-number-display').textContent = config.nagadNumber;
+            document.getElementById('verification-modal').classList.remove('hidden');
+        }
+
+        async function processReferralBonus(referrerId) {
+            const config = getConfig();
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.email === referrerId);
+            
+            if (userIndex !== -1) {
+                users[userIndex].balance = (users[userIndex].balance || 0) + config.referralBonus;
+                users[userIndex].referralEarnings = (users[userIndex].referralEarnings || 0) + config.referralBonus;
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Send notification to referrer
+                await sendNotificationToUser(referrerId, `Congratulations! You earned ${config.referralBonus} Taka for a successful referral.`);
+            }
+        }
+
+        function updateWithdrawEligibility() {
+            const config = getConfig();
+            const user = getCurrentUser();
+            const freeReferrals = user.freeReferrals || 0;
+            const withdrawButton = document.getElementById('withdraw-button');
+            const eligibilityText = document.getElementById('withdraw-eligibility');
+            
+            if (freeReferrals >= config.minFreeReferrals) {
+                withdrawButton.disabled = false;
+                withdrawButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                eligibilityText.textContent = `✓ Eligible for withdrawal (${freeReferrals}/${config.minFreeReferrals} free referrals)`;
+                eligibilityText.className = 'text-sm text-green-400';
+            } else {
+                withdrawButton.disabled = true;
+                withdrawButton.classList.add('opacity-50', 'cursor-not-allowed');
+                eligibilityText.textContent = `Need ${config.minFreeReferrals - freeReferrals} more free referrals to withdraw (${freeReferrals}/${config.minFreeReferrals})`;
+                eligibilityText.className = 'text-sm text-yellow-400';
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('show-signup').addEventListener('click', () => {
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('signup-view').classList.remove('hidden');
+            });
+
+            document.getElementById('show-login').addEventListener('click', () => {
+                document.getElementById('signup-view').classList.add('hidden');
+                document.getElementById('login-view').classList.remove('hidden');
+            });
+
+            document.getElementById('signup-btn').addEventListener('click', handleSignup);
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('notification-bell').addEventListener('click', () => {
+                navigateTo('notifications-page');
+                loadNotifications();
+            });
+            document.getElementById('copy-code-btn').addEventListener('click', copyReferralCode);
+            document.getElementById('withdraw-btn').addEventListener('click', handleWithdrawal);
+            document.getElementById('withdraw-method').addEventListener('change', updateDynamicPaymentFields);
+            document.getElementById('home-withdraw-btn').addEventListener('click', () => navigateTo('wallet-page'));
+            document.getElementById('apply-referral-btn').addEventListener('click', handleApplyReferralCode);
+            document.getElementById('share-btn').addEventListener('click', shareReferralCode);
+
+            // Verification Modal Event Listeners
+            document.getElementById('verify-account-btn').addEventListener('click', showVerificationModal);
+            document.getElementById('verification-payment-method').addEventListener('change', () => {
+                const method = document.getElementById('verification-payment-method').value;
+                const paymentNumberContainer = document.getElementById('payment-number-container');
+                const paymentMethod = document.getElementById('verification-payment-method').value;
+                const config = getConfig();
+
+                if (method === 'bkash') {
+                    document.getElementById('payment-number').textContent = config.bkashNumber;
+                    paymentNumberContainer.classList.remove('hidden');
+                } else if (method === 'nagad') {
+                    document.getElementById('payment-number').textContent = config.nagadNumber;
+                    paymentNumberContainer.classList.remove('hidden');
+                } else {
+                    paymentNumberContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        async function updateVerificationStatus() {
+            const verificationNotice = document.getElementById('verification-notice');
+            const verificationStatus = document.getElementById('verification-status');
+            const verificationPending = document.getElementById('verification-pending');
+
+            verificationNotice.classList.add('hidden');
+            verificationStatus.classList.add('hidden');
+            verificationPending.classList.add('hidden');
+
+            if (userData.verificationStatus === 'unverified') {
+                verificationNotice.classList.remove('hidden');
+            } else if (userData.verificationStatus === 'pending') {
+                verificationPending.classList.remove('hidden');
+            } else if (userData.verificationStatus === 'verified') {
+                verificationStatus.classList.remove('hidden');
+            }
+        }
+
+        window.showVerificationModal = function() {
+            const verificationModal = document.getElementById('verification-modal');
+            verificationModal.classList.remove('hidden');
+        }
+
+        window.closeVerificationModal = function() {
+            const verificationModal = document.getElementById('verification-modal');
+            verificationModal.classList.add('hidden');
+        }
+
+        window.submitVerificationRequest = async function() {
+            const paymentMethod = document.getElementById('verification-payment-method').value;
+            const senderNumber = document.getElementById('sender-number').value;
+            const transactionId = document.getElementById('transaction-id').value;
+
+            if (!paymentMethod || !senderNumber || !transactionId) {
+                return showAlert("Please fill all the fields.");
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Create verification request
+                await addDoc(collection(db, "verification_requests"), {
+                    userId: currentUser.uid,
+                    userName: userData.name,
+                    userEmail: userData.email,
+                    paymentMethod: paymentMethod,
+                    senderNumber: senderNumber,
+                    transactionId: transactionId,
+                    status: 'pending',
+                    requestedAt: serverTimestamp()
+                });
+
+                // Update user verification status to pending
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    verificationStatus: 'pending',
+                    verificationRequestedAt: serverTimestamp()
+                });
+
+                userData.verificationStatus = 'pending';
+                updateVerificationStatus();
+
+                showAlert("Verification request submitted successfully! Please wait for admin approval.");
+                closeVerificationModal();
+            } catch (error) {
+                console.error("Error submitting verification request:", error);
+                showAlert("Failed to submit verification request.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        let selectedNotificationUser = null;
+
+        async function loadNotificationsManagement() {
+            await loadRecentNotifications();
+        }
+
+        async function searchUsersForNotification() {
+            const searchTerm = document.getElementById('notification-user-search').value.trim().toLowerCase();
+            const usersList = document.getElementById('notification-users-list');
+            const resultsContainer = document.getElementById('notification-user-results');
+            
+            if (!searchTerm) {
+                resultsContainer.classList.add('hidden');
+                return;
+            }
+
+            usersList.innerHTML = '<p class="text-center text-gray-400 p-2">Searching users...</p>';
+            resultsContainer.classList.remove('hidden');
+
+            try {
+                const usersRef = collection(db, "users");
+                const usersSnapshot = await getDocs(usersRef);
+                
+                const matchingUsers = [];
+                usersSnapshot.forEach(userDoc => {
+                    const user = userDoc.data();
+                    const userData = {
+                        id: userDoc.id,
+                        name: user.name || 'No Name',
+                        email: user.email || 'No Email',
+                        uid: user.uid
+                    };
+                    
+                    // Search by name, email, or user ID
+                    if (userData.name.toLowerCase().includes(searchTerm) || 
+                        userData.email.toLowerCase().includes(searchTerm) || 
+                        userData.uid.toLowerCase().includes(searchTerm) ||
+                        userData.id.toLowerCase().includes(searchTerm)) {
+                        matchingUsers.push(userData);
+                    }
+                });
+
+                if (matchingUsers.length > 0) {
+                    usersList.innerHTML = '';
+                    matchingUsers.forEach(user => {
+                        const userDiv = document.createElement('div');
+                        userDiv.className = 'p-2 hover:bg-gray-600 rounded cursor-pointer border-b border-gray-600 last:border-b-0';
+                        userDiv.innerHTML = `
+                            <p class="font-semibold">${user.name}</p>
+                            <p class="text-sm text-gray-400">${user.email}</p>
+                            <p class="text-xs text-gray-500">ID: ${user.uid}</p>
+                        `;
+                        userDiv.onclick = () => selectUserForNotification(user);
+                        usersList.appendChild(userDiv);
+                    });
+                } else {
+                    usersList.innerHTML = '<p class="text-center text-gray-400 p-2">No users found matching your search.</p>';
+                }
+            } catch (error) {
+                console.error("Error searching users for notification:", error);
+                usersList.innerHTML = '<p class="text-center text-red-400 p-2">Error searching users.</p>';
+            }
+        }
+
+        function selectUserForNotification(user) {
+            selectedNotificationUser = user;
+            
+            // Update selected user display
+            document.getElementById('selected-user-name').textContent = user.name;
+            document.getElementById('selected-user-email').textContent = user.email;
+            document.getElementById('selected-user-display').classList.remove('hidden');
+            
+            // Hide search results
+            document.getElementById('notification-user-results').classList.add('hidden');
+            
+            // Clear search input
+            document.getElementById('notification-user-search').value = '';
+        }
+
+        function clearSelectedUser() {
+            selectedNotificationUser = null;
+            document.getElementById('selected-user-display').classList.add('hidden');
+        }
+
+        async function sendNotificationToUser() {
+            if (!selectedNotificationUser) {
+                return showAlert("Please select a user first.");
+            }
+
+            const title = document.getElementById('notification-title').value.trim();
+            const message = document.getElementById('notification-message').value.trim();
+            const type = document.getElementById('notification-type').value;
+
+            if (!title || !message) {
+                return showAlert("Please fill in both title and message.");
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Send notification to selected user
+                await addDoc(collection(db, "notifications"), {
+                    userId: selectedNotificationUser.uid,
+                    title: title,
+                    message: message,
+                    type: type,
+                    sentBy: currentUser.uid,
+                    sentByName: userData.name || 'Admin',
+                    createdAt: serverTimestamp()
+                });
+
+                // Log the notification sending activity
+                await addDoc(collection(db, "notification_logs"), {
+                    sentBy: currentUser.uid,
+                    sentByName: userData.name || 'Admin',
+                    recipientId: selectedNotificationUser.uid,
+                    recipientName: selectedNotificationUser.name,
+                    recipientEmail: selectedNotificationUser.email,
+                    title: title,
+                    message: message,
+                    type: type,
+                    sentAt: serverTimestamp()
+                });
+
+                showAlert("Notification sent successfully!");
+                
+                // Clear form
+                document.getElementById('notification-title').value = '';
+                document.getElementById('notification-message').value = '';
+                document.getElementById('notification-type').value = 'general';
+                clearSelectedUser();
+                
+                // Reload recent notifications
+                await loadRecentNotifications();
+                
+            } catch (error) {
+                console.error("Error sending notification:", error);
+                showAlert("Failed to send notification.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function sendBroadcastNotification() {
+            const title = document.getElementById('broadcast-title').value.trim();
+            const message = document.getElementById('broadcast-message').value.trim();
+            const type = document.getElementById('broadcast-type').value;
+
+            if (!title || !message) {
+                return showAlert("Please fill in both title and message.");
+            }
+
+            if (!confirm("Are you sure you want to send this notification to ALL users? This action cannot be undone.")) {
+                return;
+            }
+
+            loader.style.display = 'flex';
+            try {
+                // Get all users
+                const usersSnapshot = await getDocs(collection(db, "users"));
+                const batch = [];
+
+                // Create notification for each user
+                usersSnapshot.forEach(userDoc => {
+                    const user = userDoc.data();
+                    batch.push(addDoc(collection(db, "notifications"), {
+                        userId: user.uid,
+                        title: title,
+                        message: message,
+                        type: type,
+                        sentBy: currentUser.uid,
+                        sentByName: userData.name || 'Admin',
+                        isBroadcast: true,
+                        createdAt: serverTimestamp()
+                    }));
+                });
+
+                // Send all notifications
+                await Promise.all(batch);
+
+                // Log the broadcast activity
+                await addDoc(collection(db, "notification_logs"), {
+                    sentBy: currentUser.uid,
+                    sentByName: userData.name || 'Admin',
+                    recipientId: 'ALL_USERS',
+                    recipientName: 'All Users',
+                    recipientEmail: 'broadcast',
+                    title: title,
+                    message: message,
+                    type: type,
+                    isBroadcast: true,
+                    recipientCount: usersSnapshot.size,
+                    sentAt: serverTimestamp()
+                });
+
+                showAlert(`Broadcast notification sent to ${usersSnapshot.size} users successfully!`);
+                
+                // Clear form
+                document.getElementById('broadcast-title').value = '';
+                document.getElementById('broadcast-message').value = '';
+                document.getElementById('broadcast-type').value = 'general';
+                
+                // Reload recent notifications
+                await loadRecentNotifications();
+                
+            } catch (error) {
+                console.error("Error sending broadcast notification:", error);
+                showAlert("Failed to send broadcast notification.");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        async function loadRecentNotifications() {
+            const recentNotificationsList = document.getElementById('admin-recent-notifications');
+            recentNotificationsList.innerHTML = '<p class="text-center text-gray-400">Loading recent notifications...</p>';
+
+            try {
+                const notificationLogsQuery = query(
+                    collection(db, "notification_logs"),
+                    orderBy("sentAt", "desc"),
+                    limit(20)
+                );
+                const notificationLogsSnapshot = await getDocs(notificationLogsQuery);
+
+                if (!notificationLogsSnapshot.empty) {
+                    recentNotificationsList.innerHTML = '';
+                    notificationLogsSnapshot.forEach(logDoc => {
+                        const log = logDoc.data();
+                        const logDiv = document.createElement('div');
+                        logDiv.className = 'card-bg p-3 rounded-lg border-l-4';
+                        
+                        // Set border color based on type
+                        let borderColor = 'border-gray-500';
+                        if (log.type === 'important') borderColor = 'border-red-500';
+                        else if (log.type === 'success') borderColor = 'border-green-500';
+                        else if (log.type === 'warning') borderColor = 'border-yellow-500';
+                        else if (log.type === 'announcement') borderColor = 'border-blue-500';
+                        
+                        logDiv.className += ` ${borderColor}`;
+                        
+                        logDiv.innerHTML = `
+                            <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-bold text-sm">${log.title}</h4>
+                                <div class="flex items-center space-x-2">
+                                    ${log.isBroadcast ? '<span class="bg-red-600 text-white px-2 py-1 rounded text-xs font-bold">BROADCAST</span>' : '<span class="bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">DIRECT</span>'}
+                                    <span class="bg-gray-600 text-white px-2 py-1 rounded text-xs capitalize">${log.type}</span>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-300 mb-2">${log.message}</p>
+                            <div class="text-xs text-gray-400">
+                                <p><strong>To:</strong> ${log.isBroadcast ? `All Users (${log.recipientCount})` : `${log.recipientName} (${log.recipientEmail})`}</p>
+                                <p><strong>Sent:</strong> ${formatDate(log.sentAt)}</p>
+                                <p><strong>By:</strong> ${log.sentByName}</p>
+                            </div>
+                        `;
+                        recentNotificationsList.appendChild(logDiv);
+                    });
+                } else {
+                    recentNotificationsList.innerHTML = '<p class="text-center text-gray-400">No notifications sent yet.</p>';
+                }
+            } catch (error) {
+                console.error("Error loading recent notifications:", error);
+                recentNotificationsList.innerHTML = '<p class="text-center text-red-400">Failed to load recent notifications.</p>';
+            }
+        }
+
+        loadConfiguration();
+    </script>
+</body>
+</html>
